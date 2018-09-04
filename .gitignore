@@ -12,6 +12,8 @@
 
 # Package Files #
 *.jar
+*.idea
+target
 *.war
 *.nar
 *.ear
