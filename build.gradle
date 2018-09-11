@@ -3,6 +3,8 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
+        maven { url "https://jitpack.io" }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -15,15 +17,40 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'kotlin'
 
+
 sourceCompatibility = 1.8
+
+apply plugin:'application'
+mainClassName = "MainKt"
+
+kotlin {
+    experimental {
+        coroutines 'enable'
+    }
+}
+
+run {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "com.github.TREMA-UNH:trec-car-tools-java:9"
+    compile "org.apache.httpcomponents:httpclient:4.5.5"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21"
+    compile "org.apache.lucene:lucene-core:7.2.1"
+    compile "com.google.code.gson:gson:2.8.0"
+    compile "com.jsoniter:jsoniter:0.9.19"
+    compile "com.github.jkcclemens:khttp:0.1.0"
 }
 
 compileKotlin {
