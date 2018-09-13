@@ -1,5 +1,8 @@
 import annotating.TagmeAnnotator
+import evaluation.rouge.RougeEvaluator
 import experiment.ExperimentRunner
+import experiment.RougeExperimentRunner
+import indexing.QuickAndDirtyParagraphIndexer
 import parsing.*
 
 fun generateClickQrels() {
@@ -12,8 +15,8 @@ fun generateClickQrels() {
 //    val spotQrels = "/mnt/grapes/share/trec-car-allruns-2018/joinparas/joined.tree.entity.qrels"
 //    val hierQrels = "/home/jsc57/data/benchmark/benchmarkY1/benchmarkY1-train/train.pages.cbor-hierarchical.entity.qrels"
 
-//    doParse(qrelParams.entityQrelLoc, clickstreamLoc)
-    doParse(hierQrels, clickstreamLoc)
+    doParse(qrelParams.entityQrelLoc, clickstreamLoc)
+//    doParse(hierQrels, clickstreamLoc)
 
 //    createParagraphClickQrels(
 //            indexLoc = "/home/jsc57/data/backup/extractions/paragraph2/",
@@ -51,13 +54,40 @@ fun runComparison() {
     runner.evaluateQrel(enwikiQrels, "tagme_annotated")
     runner.evaluateQrel(treeQrels, "tree_standard")
     runner.evaluateQrel(clickQrels, "clickstream")
+}
+
+
+fun testParse() {
+    val evaluator = RougeEvaluator("/home/jsc57/data/backup/extractions/paragraph2", "/home/ben/trec-car/data/benchmarkY2/benchmarkY2/benchmarkY2.cbor.tree.qrels")
+    evaluator.compare("/mnt/grapes/share/trec-car-allruns-2018/psgruns/UNH-p-sdm")
 
 }
 
-fun main(args: Array<String>) {
+fun testRouge() {
+    val trec = "/home/jsc57/programs/trec_eval"
+//    val qrels = "/home/jsc57/data/benchmark/test/benchmarkY1/benchmarkY1-test/test.pages.cbor-hierarchical.qrels"
+    val qrels = "/home/jsc57/new_qrels/y2_manual_passage_enwiki.qrels"
+//    val runfiles = "/mnt/grapes/share/car2017/psg-all"
+    val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
 
-    generateClickQrels()
+    val runner = RougeExperimentRunner(trec, runfiles)
+    runner.evaluateQrel(qrels, "Hierarchical", "/home/jsc57/data/backup/extractions/paragraph2" )
+
+}
+
+fun computeAccuracy( tp: Int, tn: Int, fp: Int, fn: Int ) =
+    (tp.toDouble() + tn) / (tp + tn + fp + fn)
+
+fun main(args: Array<String>) {
+    System.setProperty("file.encoding", "UTF-8")
+
+
+//    generateClickQrels()
 //    runPageAnnotator()
-    runComparison()
+//    runComparison()
+//    testParse()
+//    testRouge()
+    QuickAndDirtyParagraphIndexer()
+        .run()
 
 }

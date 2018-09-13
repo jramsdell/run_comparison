@@ -7,6 +7,7 @@ data class TrecEvalResult(
         val map: Double,
         val rprec: Double,
         val p5: Double,
+        val ndcg: Double,
         val name: String
 )
 
@@ -14,7 +15,7 @@ data class TrecEvalResult(
 class TrecEvalRunner(val evalLoc: String) {
 
     fun evaluate(runLoc: String, qrelLoc: String): TrecEvalResult {
-        val command = "$evalLoc -c $qrelLoc $runLoc"
+        val command = "$evalLoc -m all_trec $qrelLoc $runLoc"
 
         val processBuilder = ProcessBuilder(command.split(" "))
         val process = processBuilder.start()
@@ -26,6 +27,7 @@ class TrecEvalRunner(val evalLoc: String) {
         val map = result[5]
         val rprec = result[7]
         val p5 = result[21]
+        val ndcg = result[55]
         val rep = { s: String ->
                 s.split("\\s+".toRegex())
                 .last()
@@ -35,6 +37,7 @@ class TrecEvalRunner(val evalLoc: String) {
                 map = rep(map),
                 rprec = rep(rprec),
                 p5 = rep(p5),
+                ndcg = rep(ndcg),
                 name = runLoc.split("/").last())
     }
 
