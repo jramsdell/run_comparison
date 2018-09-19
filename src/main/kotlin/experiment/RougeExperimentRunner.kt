@@ -1,10 +1,11 @@
 package experiment
 
 import evaluation.rouge.RougeEvaluator
-import process.TrecEvalResult
 import process.TrecEvalRunner
+import utils.createSpearmanMatrix
+import utils.getSpearman
 import java.io.File
-import kotlin.math.pow
+
 
 data class RankData(
         var rank: Int = 0,
@@ -27,8 +28,16 @@ class RougeExperimentRunner(
     val runner = TrecEvalRunner(trecEvalLoc)
     val runfiles = File(runDirectoryLoc).listFiles().toList()
 
-    fun evaluateQrel(qrelLoc: String, qrelName: String, indexLoc: String) {
-        val rouge = RougeEvaluator(indexLoc, qrelLoc)
+    fun generateRougeQrels(qrelLoc: String, qrelName: String, sourceLoc: String,
+                     targetLoc: String) {
+        val rouge = RougeEvaluator(sourceLoc, targetLoc, qrelLoc)
+        rouge.generateRougeQrels(runfiles)
+
+    }
+
+    fun evaluateQrel(qrelLoc: String, rougeQrelLoc: String, qrelName: String, sourceLoc: String,
+                     targetLoc: String): ArrayList<RankStat> {
+        val rouge = RougeEvaluator(sourceLoc, targetLoc, rougeQrelLoc)
 
         val out = File(qrelName + ".txt").bufferedWriter()
         val outRanked = File(qrelName + "_ranked" + ".txt").bufferedWriter()
@@ -50,6 +59,7 @@ class RougeExperimentRunner(
                     rprec = RankData(score = result.rprec),
                     f1 = RankData(score = f1)
             )
+
             results.add(rStat)
 
             with (result) {
@@ -76,19 +86,25 @@ class RougeExperimentRunner(
 
         val rankMap = results.map { it.map.rank }
         val rankF1 = results.map { it.f1.rank }
-        val n = rankMap.size.toDouble()
-
-        val s1 = rankMap.zip(rankF1).sumByDouble { (x, y) -> (x - y).toDouble().pow(2.0) * 6.0  }
-
-        val spearman = 1.0 - (s1 / (n * (n.pow(2.0) - 1.0) ))
-        println("Spearman: $spearman")
-
+//        val n = rankMap.size.toDouble()
+//        val s1 = rankMap.zip(rankF1).sumByDouble { (x, y) -> (x - y).toDouble().pow(2.0) * 6.0  }
+//        val spearman = 1.0 - (s1 / (n * (n.pow(2.0) - 1.0) ))
+        val spearman = getSpearman(rankMap, rankF1)
+        out.write("Spearman: $spearman\n")
 
         out.close()
         outRanked.close()
+
+        println("========= $qrelName =========")
+        createSpearmanMatrix(results, results)
+        println("==================")
+        return results
     }
 
+
 }
+
+
 
 
 fun rankBy(stats: List<RankStat>, f: (RankStat) -> RankData) {

@@ -14,6 +14,7 @@ import java.util.stream.StreamSupport
 import co.nstant.`in`.cbor.model.DataItem
 import co.nstant.`in`.cbor.model.UnicodeString
 import edu.unh.cs.treccar_v2.read_data.CborListWithHeaderIterator
+import org.apache.lucene.document.Document
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.IndexSearcher
@@ -21,20 +22,19 @@ import utils.AnalyzerFunctions
 import utils.AnalyzerFunctions.AnalyzerType.ANALYZER_ENGLISH_STOPPED
 import utils.lucene.*
 import org.apache.lucene.analysis.StopwordAnalyzerBase
-import org.apache.lucene.analysis.core.SimpleAnalyzer
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer
-import org.apache.lucene.document.*
+import org.apache.lucene.document.Field
+import org.apache.lucene.document.StoredField
+import org.apache.lucene.document.TextField
 import utils.AnalyzerFunctions.AnalyzerType.ANALYZER_STANDARD_STOPPED
 import utils.forEachParallelQ
 import utils.getIndexWriter
 import java.lang.Integer.min
 
 
-class QuickAndDirtyParagraphIndexer() {
+class TqaIndexer() {
 //    val corpus = "/home/jsc57/data/corpus/paragraphCorpus/dedup.articles-paragraphs.cbor"
     val paragraphCounter = AtomicInteger()
-//    val paragraphIndex = getIndexWriter("/home/jsc57/data/backup/old_corpus_1_5/index", mode = IndexWriterConfig.OpenMode.CREATE)
-    val paragraphIndex = getIndexWriter("/home/jsc57/data/backup/y2_benchmark/index", mode = IndexWriterConfig.OpenMode.CREATE)
+    val paragraphIndex = getIndexWriter("/home/jsc57/data/backup/old_corpus_1_5/index", mode = IndexWriterConfig.OpenMode.CREATE)
 //    val linker = SpotlightEntityLinker("/home/jsc57/projects/jsr-joint-learning/spotlight_server")
 //        .apply { (0 until 100).forEach { queryServer("Test") }   }
 
@@ -45,15 +45,14 @@ class QuickAndDirtyParagraphIndexer() {
 
     fun processParagraphs(paragraph: Data.Paragraph) {
         val doc = Document()
-        doc.add(StringField("paragraphid", paragraph.paraId, Field.Store.YES))
+        doc.add(TextField("paragraphid", paragraph.paraId, Field.Store.YES))
         doc.add(TextField("text", paragraph.textOnly, Field.Store.YES))
         paragraphIndex.addDocument(doc)
 
     }
 
     fun run() {
-//        val corpusStream = File("/home/jsc57/data/old_v1_5_corpus/paragraphcorpus/paragraphcorpus.cbor")
-        val corpusStream = File("/mnt/grapes/share/trec-car-allruns-2018/benchmarkY2/benchmarkY2.cbor-paragraphs.cbor")
+        val corpusStream = File("/home/jsc57/data/old_v1_5_corpus/paragraphcorpus/paragraphcorpus.cbor")
             .inputStream()
             .buffered()
             DeserializeData.iterableParagraphs(corpusStream)
