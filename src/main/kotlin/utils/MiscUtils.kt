@@ -110,6 +110,7 @@ fun createSpearmanMatrix(comparisons: List<Pair<String, List<Int>>>) {
         print(toBf(comp1.first) + " & ")
         println(row.joinToString(" & ") + "\\\\\\hline")
     }
-
-
 }
+
+
+

@@ -35,6 +35,32 @@ class RougeExperimentRunner(
 
     }
 
+    fun generateEvals(qrelLoc: String, rougeQrelLoc: String, qrelName: String, sourceLoc: String,
+                     targetLoc: String) {
+
+        val rouge = RougeEvaluator(sourceLoc, targetLoc, rougeQrelLoc)
+        File("eval_results/$qrelName/") .run { if (!exists()) mkdirs() }
+        runfiles.forEachIndexed { index, runfile ->
+            println(index)
+            val path = runfile.absolutePath
+            val trecEvals = runner.retrieveEvalStats(path, qrelLoc)
+            val f1 = rouge.getEval(path)
+            val name = runfile.name
+            val out = File("eval_results/$qrelName/$name").bufferedWriter()
+
+            (trecEvals + f1)
+                .groupBy { it.query }
+                .forEach { (name, results) ->
+                    results.forEach { result ->
+                        with (result) {
+                            out.write("$method\t$query\t$score\n")
+                        }
+                    }
+                }
+            out.close()
+        }
+    }
+
     fun evaluateQrel(qrelLoc: String, rougeQrelLoc: String, qrelName: String, sourceLoc: String,
                      targetLoc: String): ArrayList<RankStat> {
         val rouge = RougeEvaluator(sourceLoc, targetLoc, rougeQrelLoc)

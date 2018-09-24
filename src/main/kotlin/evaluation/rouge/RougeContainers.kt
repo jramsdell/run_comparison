@@ -5,8 +5,15 @@ import utils.defaultWhenNotFinite
 data class RougeDoc(
         val id: String,
         val unigrams: Set<String>,
-        val bigrams: Set<String>
-)
+        val bigrams: Set<String>) {
+
+    fun quickF1(target: RougeDoc): Double {
+        val precision = precisionFun(bigrams, target.bigrams)
+        val recall = recallFun(bigrams, target.bigrams)
+        val f1 = ((2 * precision * recall) / (precision + recall)).defaultWhenNotFinite(0.0)
+        return f1
+    }
+}
 
 data class RougeDocStats(
         val doc: RougeDoc,
@@ -17,6 +24,7 @@ data class RougeDocStats(
 
 class RougeEvaluationFunction(
         val name: String,
+        val query: String,
         val doc: RougeDoc,
         var precision: Double = 0.0,
         var recall: Double = 0.0,

@@ -1,4 +1,5 @@
 import annotating.TagmeAnnotator
+import evaluation.EvalAnalyzer
 import evaluation.rouge.RougeEvaluator
 import experiment.ExperimentRunner
 import experiment.RankStat
@@ -104,26 +105,6 @@ fun testRouge() {
 
 }
 
-//fun evaluateAutomaticRouge() {
-//    val trec = "/home/jsc57/programs/trec_eval"
-//    val unfilteredRougeAutomaticQrels = "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels"
-//    val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
-//    val runner = RougeExperimentRunner(trec, runfiles)
-//    runner.evaluateQrel(unfilteredRougeAutomaticQrels, "rouge_automatic",
-//            "/home/jsc57/data/backup/extractions/paragraph2",
-//            "/home/jsc57/data/backup/y2_benchmark/index" )
-//}
-//
-//fun evaluateManualRouge() {
-//    val trec = "/home/jsc57/programs/trec_eval"
-//    val unfilteredRougeAutomaticQrels = "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels"
-//    val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
-//
-//    val runner = RougeExperimentRunner(trec, runfiles)
-//    runner.evaluateQrel(unfilteredRougeAutomaticQrels, "rouge_manual",
-//            "/home/jsc57/data/backup/extractions/paragraph2",
-//            "/home/jsc57/data/backup/y2_benchmark/index" )
-//}
 
 fun evaluateSetQrels() {
     val trec = "/home/jsc57/programs/trec_eval"
@@ -158,12 +139,13 @@ fun evaluateTqaEnwikiQrels() {
 //    val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
     val runfiles = "/home/jsc57/fixed_psg_runs"
     val qrels = listOf(
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "rouge_automatic_enwiki"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "rouge_automatic_tqa"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "rouge_manual_enwiki"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "rouge_manual_tqa")
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-agreement.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "rouge_agreement")
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "rouge_automatic_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "rouge_automatic_tqa"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "rouge_manual_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "rouge_manual_tqa"),
+            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "rouge_generated_automatic_tqa")
     )
+
 
 
     val runner = RougeExperimentRunner(trec, runfiles)
@@ -179,30 +161,50 @@ fun evaluateTqaEnwikiQrels() {
         rankings.add(name to qrelResult)
     }
 
-    createSpearmanMatrix(results)
-    println("=====================")
 
-    println(" \\textbf{Run} & " + rankings.map { " \\textbf{" + it.first + "} " }.joinToString(" & ") + "\\\\\\hline")
-    val n = rankings.first().second.size
-    (0 until n).forEach { index ->
-        val ranks = rankings.map { it.second[index].f1.rank }.joinToString(" & ")
-        println(rankings.first().second[index].name + " & " + ranks + "\\\\\\hline")
+//    createSpearmanMatrix(results)
+//    println("=====================")
+//
+//    println(" \\textbf{Run} & " + rankings.map { " \\textbf{" + it.first + "} " }.joinToString(" & ") + "\\\\\\hline")
+//    val n = rankings.first().second.size
+//    (0 until n).forEach { index ->
+//        val ranks = rankings.map { it.second[index].f1.rank }.joinToString(" & ")
+//        println(rankings.first().second[index].name + " & " + ranks + "\\\\\\hline")
+//    }
+//
+//    val onlyManual = listOf(rankings[2], rankings[3])
+//    println(" \\textbf{Run} & " + onlyManual.map { " \\textbf{" + it.first + "} " }.joinToString(" & ") + "\\\\\\hline")
+//    (0 until n).forEach { index ->
+//        val ranks = onlyManual.map { it.second[index].map.rank }.joinToString(" & ")
+//        println(onlyManual.first().second[index].name + " & " + ranks + "\\\\\\hline")
+//    }
+//
+//
+//    // MAP
+//    println("========")
+//    createSpearmanMatrix(listOf(
+//            results2[0], results2[2], results2[3]
+//    ))
+}
+
+fun generateEvals() {
+    val trec = "/home/jsc57/programs/trec_eval"
+    val runfiles = "/home/jsc57/fixed_psg_runs"
+    val qrels = listOf(
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels",  "automatic"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
+            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
+    )
+
+    val runner = RougeExperimentRunner(trec, runfiles)
+    qrels.forEach { (qrel, rougeQrel, name) ->
+        runner.generateEvals(qrel, rougeQrel, name,
+                "/home/jsc57/data/backup/extractions/paragraph2",
+                "/home/jsc57/data/backup/y2_benchmark/index" )
     }
-
-    val onlyManual = listOf(rankings[2], rankings[3])
-    println(" \\textbf{Run} & " + onlyManual.map { " \\textbf{" + it.first + "} " }.joinToString(" & ") + "\\\\\\hline")
-    (0 until n).forEach { index ->
-        val ranks = onlyManual.map { it.second[index].map.rank }.joinToString(" & ")
-        println(onlyManual.first().second[index].name + " & " + ranks + "\\\\\\hline")
-    }
-
-    println("========")
-    createSpearmanMatrix(results2.drop(2))
-
-
-
-
-
 }
 
 
@@ -217,73 +219,21 @@ fun generateRougeQrels() {
 //    val qrels = "/home/jsc57/tree_tqa.qrels"
 //    val runfiles = "/mnt/grapes/share/car2017/psg-all"
     val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
+    val tqaAuto = "/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-tqa.qrels"
 
     val runner = RougeExperimentRunner(trec, runfiles)
-
-    runner.generateRougeQrels(rougeAutomaticQrels, "rouge_automatic",
+    runner.generateRougeQrels(tqaAuto, "tqa_automatic",
             "/home/jsc57/data/backup/extractions/paragraph2",
-            "/home/jsc57/data/backup/extractions/paragraph2")
+            "/home/jsc57/data/backup/y2_benchmark/index" )
 
 }
 
 
-val potentials = """enwiki:Aerobic%20fermentation
-enwiki:Aged%20care%20in%20Australia
-enwiki:Algorithmic%20bias
-enwiki:Alternative%20medicine
-enwiki:Arab%20slave%20trade
-enwiki:Atomic%20force%20microscopy
-enwiki:Blockchain
-enwiki:Blue-ringed%20octopus
-enwiki:Breakdancing
-enwiki:Chatbot
-enwiki:Chiropractic
-enwiki:Darknet%20market
-enwiki:Daylight%20saving%20time
-enwiki:Economics%20of%20bitcoin
-enwiki:Eggnog
-enwiki:Electric%20car
-enwiki:Entomophagy
-enwiki:Great%20white%20shark
-enwiki:Gunshot%20wound
-enwiki:Healthcare%20in%20Canada
-enwiki:Herbalism
-enwiki:Huguenots
-enwiki:Hybrid%20electric%20vehicle
-enwiki:Loot%20box
-enwiki:Mate%20(drink)
-enwiki:Microaggression
-enwiki:Opioid%20epidemic
-enwiki:Question%20mark
-enwiki:Radiocarbon%20dating
-enwiki:Salmon%20run
-enwiki:Theory%20of%20forms
-enwiki:Workhouse
-enwiki:Xerostomia
-enwiki:Zika%20fever""".trimIndent()
-
-
-fun doSearch() {
-    val pLoc = "/home/jsc57/data/backup/new/extractions/page"
-    val searcher = getIndexSearcher(pLoc)
-
-    potentials.split("\n")
-        .forEach { line ->
-            val tokens = AnalyzerFunctions.createTokenList(line.replace("enwiki:", "").replace("%20", " "))
-            val q = tokens
-                .map { TermQuery(Term("name", it)) }
-                .fold(BooleanQuery.Builder()) { builder, token -> builder.add(token, BooleanClause.Occur.SHOULD) }
-                .build()
-
-            searcher.search(q, 3)
-                .scoreDocs
-                .forEach { sd ->
-
-                    println(searcher.doc(sd.doc).get("name"))
-                }
-            println()
-        }
+fun analyzeEvals() {
+    val analyzer = EvalAnalyzer()
+    analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/eval_results")
 }
+
 
 
 fun main(args: Array<String>) {
@@ -297,7 +247,9 @@ fun main(args: Array<String>) {
 //    evaluateAutomaticRouge()
 //    evaluateManualRouge()
 //    evaluateSetQrels()
-    evaluateTqaEnwikiQrels()
+//    evaluateTqaEnwikiQrels()
+//    generateEvals()
+    analyzeEvals()
 //    getIds()
 //    generateRougeQrels()
 //    testSpec()
