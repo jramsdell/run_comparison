@@ -36,19 +36,20 @@ class RougeExperimentRunner(
     }
 
     fun generateEvals(qrelLoc: String, rougeQrelLoc: String, qrelName: String, sourceLoc: String,
-                     targetLoc: String) {
+                     targetLoc: String, outputDir: String = "eval_results", noRouge: Boolean = false) {
 
         val rouge = RougeEvaluator(sourceLoc, targetLoc, rougeQrelLoc)
-        File("eval_results/$qrelName/") .run { if (!exists()) mkdirs() }
+        File("$outputDir/$qrelName/") .run { if (!exists()) mkdirs() }
         runfiles.forEachIndexed { index, runfile ->
             println(index)
             val path = runfile.absolutePath
             val trecEvals = runner.retrieveEvalStats(path, qrelLoc)
-            val f1 = rouge.getEval(path)
+            val f1 = if (noRouge) emptyList() else rouge.getEval(path)
             val name = runfile.name
-            val out = File("eval_results/$qrelName/$name").bufferedWriter()
+            val out = File("$outputDir/$qrelName/$name").bufferedWriter()
+            val results = if(noRouge) trecEvals else trecEvals + f1
 
-            (trecEvals + f1)
+            (results)
                 .groupBy { it.query }
                 .forEach { (name, results) ->
                     results.forEach { result ->

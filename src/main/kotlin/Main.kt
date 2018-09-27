@@ -191,19 +191,20 @@ fun generateEvals() {
     val trec = "/home/jsc57/programs/trec_eval"
     val runfiles = "/home/jsc57/fixed_psg_runs"
     val qrels = listOf(
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels",  "automatic"),
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
-            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels",  "automatic"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual")
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
+//            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "gen_automatic_enwiki")
     )
 
     val runner = RougeExperimentRunner(trec, runfiles)
     qrels.forEach { (qrel, rougeQrel, name) ->
         runner.generateEvals(qrel, rougeQrel, name,
                 "/home/jsc57/data/backup/extractions/paragraph2",
-                "/home/jsc57/data/backup/y2_benchmark/index" )
+                "/home/jsc57/data/backup/y2_benchmark/index")
     }
 }
 
@@ -219,13 +220,45 @@ fun generateRougeQrels() {
 //    val qrels = "/home/jsc57/tree_tqa.qrels"
 //    val runfiles = "/mnt/grapes/share/car2017/psg-all"
     val runfiles = "/mnt/grapes/share/trec-car-allruns-2018/psgruns"
-    val tqaAuto = "/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-tqa.qrels"
+//    val tqaAuto = "/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-tqa.qrels"
+    val enwikiAuto = "/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels"
 
     val runner = RougeExperimentRunner(trec, runfiles)
-    runner.generateRougeQrels(tqaAuto, "tqa_automatic",
+    runner.generateRougeQrels(enwikiAuto, "enwiki_generated_automatic",
             "/home/jsc57/data/backup/extractions/paragraph2",
             "/home/jsc57/data/backup/y2_benchmark/index" )
 
+}
+
+fun generateEntityEvals() {
+    val trec = "/home/jsc57/programs/trec_eval"
+    val automaticEntity = "/home/ben/trec-car/data/benchmarkY2/benchmarkY2/benchmarkY2.cbor.tree.entity.qrels"
+    val manualEntity = "/mnt/grapes/share/trec-car-allruns-2018/all-judgments/manual/all-entity.qrels"
+    val clickQrels = "/home/jsc57/projects/run_comparison/click_qrels_tree.qrels"
+    val mergedQrels = "/home/jsc57/projects/run_comparison/merged.qrels"
+
+    val runfiles = "/home/jsc57/entruns"
+    val qrels = listOf(
+            Triple(automaticEntity, automaticEntity, "automatic_entity"),
+            Triple(manualEntity, manualEntity, "manual_entity"),
+            Triple(clickQrels, clickQrels, "click_entity")
+//            Triple(clickQrels, clickQrels, "merged_entity")
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
+//            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
+//            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "gen_automatic_enwiki")
+    )
+
+    val runner = RougeExperimentRunner(trec, runfiles)
+    qrels.forEach { (qrel, rougeQrel, name) ->
+        runner.generateEvals(qrel, rougeQrel, name,
+                "/home/jsc57/data/backup/extractions/paragraph2",
+                "/home/jsc57/data/backup/y2_benchmark/index",
+                outputDir = "entity_eval_results",
+                noRouge = true)
+    }
 }
 
 
@@ -234,6 +267,22 @@ fun analyzeEvals() {
     analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/eval_results")
 }
 
+fun analyzeEntityEvals() {
+    val analyzer = EvalAnalyzer()
+    analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/entity_eval_results")
+}
+
+fun analyzeNewEvals() {
+    val analyzer = EvalAnalyzer()
+    analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/new_passage_eval_results")
+}
+
+
+fun quickDirtyConvert() {
+    QuickAndDirtyHierToTree("/home/jsc57/projects/run_comparison/prototype_2_illegal.qrels",
+            "prototype_2_illegal_tree.qrels")
+        .run()
+}
 
 
 fun main(args: Array<String>) {
@@ -248,16 +297,22 @@ fun main(args: Array<String>) {
 //    evaluateManualRouge()
 //    evaluateSetQrels()
 //    evaluateTqaEnwikiQrels()
-//    generateEvals()
     analyzeEvals()
-//    getIds()
+
 //    generateRougeQrels()
+//    generateEvals()
+//    generateEntityEvals()
+//    analyzeEvals()
+//    analyzeEntityEvals()
+//    analyzeNewEvals()
+//    getIds()
 //    testSpec()
 //    doSearch()
 //    fixQrels()
 //    QuickAndDirtyParagraphIndexer()
 //        .run()
 
+//    quickDirtyConvert()
     System.exit(0)
 
 }

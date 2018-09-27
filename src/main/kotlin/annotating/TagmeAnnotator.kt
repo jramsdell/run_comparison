@@ -26,12 +26,15 @@ class TagmeAnnotator(val cborLoc: String, entityMapLoc: String) {
         val out = ArrayList<Pair<String, String>>()
 
         page.foldOverSectionWithId(useFilter = false) { path, section, paragraphs ->
+//            println("$path : ${paragraphs.size}")
             val nPath = path.replace(" ", "%20")
             val entitiesInSection = HashMap<String, ArrayList<String>>()
+//            println(path)
             paragraphs.forEach { p ->
                 val pid = p.paraId
                 val results =  doTagMeQuery(p.textOnly)
                     .distinctBy { it.first }
+//                val results = emptyList<Pair<String, Double>>()
 
                 results.forEach { (entity, _) ->
                     entitiesInSection.computeIfAbsent(entity) { ArrayList() }
@@ -40,16 +43,20 @@ class TagmeAnnotator(val cborLoc: String, entityMapLoc: String) {
             }
 //
             entitiesInSection.forEach { (entity, support) ->
-                val lookup = entityMap[entity] ?: ""
+                var lookup = entityMap[entity] ?: ""
                 if (lookup == "") {
                     println("Something went wrong for: $entity ... at path: $nPath")
+                    lookup = entity
+                    out.add(nPath to "$nPath Q0 $lookup 1")
                 } else {
 //                val converted = entity.replace("_", " ")
 //                    .replace(" ", "%20")
 //                    .run { "enwiki:" + this }
-                    support.forEach { supportPar ->
-                        out.add(nPath to "$nPath Q0 $supportPar/$lookup 1")
-                    }
+                    out.add(nPath to "$nPath Q0 $lookup 1")
+//                    support.forEach { supportPar ->
+////                        out.add(nPath to "$nPath Q0 $supportPar/$lookup 1")
+//                        out.add(nPath to "$nPath Q0 $lookup 1")
+//                    }
                 }
             }
         }
@@ -63,10 +70,10 @@ class TagmeAnnotator(val cborLoc: String, entityMapLoc: String) {
             .inputStream()
             .buffered()
 
-        val outFile = File("prototype.qrels").bufferedWriter()
+        val outFile = File("prototype_2_illegal.qrels").bufferedWriter()
 
         DeserializeData.iterableAnnotations(iFile)
-            .filter { it.pageId.startsWith("enwiki:") }
+//            .filter { it.pageId.startsWith("enwiki:") }
             .pmap { page -> parse(page) }
             .flatten()
             .sortedBy { it.first }

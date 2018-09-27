@@ -57,8 +57,18 @@ class EvalAnalyzer() {
 
     fun analyzeEvalResults(evalFolderLoc: String) {
         val rankings = retrieveRankings(evalFolderLoc)
+        val allowed = setOf(
+                "map",
+                "RougeF1"
+//                "ndcg",
+//                "Rndcg",
+//                "ndcg_rel",
+//                "ndcg_cut_5"
+
+        )
         val filteredRankings =
-                rankings.filter { it.methodName == "RougeF1" || it.methodName == "map" }
+//                rankings.filter { it.methodName == "RougeF1" || it.methodName == "map" || it.methodName == "ndcg"}
+        rankings.filter { it.methodName in allowed }
                     .sortedByDescending { it.qrelName  }
         generateMatrixFromRankings(filteredRankings)
 

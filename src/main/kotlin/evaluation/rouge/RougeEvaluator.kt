@@ -243,6 +243,8 @@ class RougeEvaluator(sourceLoc: String, targetLoc: String, qrelDist: String) {
                 .map { (query,v) ->
                     query to v.values.pmap { relDoc ->
                         val candidates = retrieveCandidatesClosestToRelevantDocument(relDoc)
+                        candidates.sortedByDescending { candidate -> candidate.quickF1(relDoc) }
+//                            .take(2)
                         candidates.filter { candidate -> candidate.quickF1(relDoc) >= 0.6 } }
                         .flatten()
                         .map { it.id }.distinct() }

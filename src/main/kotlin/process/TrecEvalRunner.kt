@@ -49,6 +49,7 @@ class TrecEvalRunner(val evalLoc: String) {
         val process = processBuilder.start()
         Runtime.getRuntime().addShutdownHook(Thread { process.destroy() })
 
+//        val validMethods = setOf( "map", "Rprec", "ndcg", "P_5", "ndcg_cut_5", "Rndcg", "ndcg_rel" )
         val validMethods = setOf( "map", "Rprec", "ndcg", "P_5" )
         val result = process.inputStream.bufferedReader().readLines()
         process.waitFor()
