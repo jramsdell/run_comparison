@@ -1,6 +1,7 @@
 import annotating.TagmeAnnotator
 import evaluation.EvalAnalyzer
 import evaluation.rouge.RougeEvaluator
+import evaluation.rouge.RougeentityF1
 import experiment.ExperimentRunner
 import experiment.RankStat
 import experiment.RougeExperimentRunner
@@ -192,11 +193,11 @@ fun generateEvals() {
     val runfiles = "/home/jsc57/fixed_psg_runs"
     val qrels = listOf(
             Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels",  "automatic"),
-            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual")
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
-//            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
-//            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_enwiki.qrels",  "manual_enwiki"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual-tqa.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual_tqa.qrels",  "manual_tqa"),
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic-enwiki.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "automatic_enwiki"),
+            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_tqa.qrels",  "automatic_tqa")
 //            Triple("/home/jsc57/new_qrels/unfiltered/rouge_generated_tqa_auto.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto_enwiki.qrels",  "gen_automatic_enwiki")
     )
 
@@ -204,7 +205,8 @@ fun generateEvals() {
     qrels.forEach { (qrel, rougeQrel, name) ->
         runner.generateEvals(qrel, rougeQrel, name,
                 "/home/jsc57/data/backup/extractions/paragraph2",
-                "/home/jsc57/data/backup/y2_benchmark/index")
+                "/home/jsc57/data/backup/y2_benchmark/index",
+                "new_passage_eval_results")
     }
 }
 
@@ -262,9 +264,10 @@ fun generateEntityEvals() {
 }
 
 
-fun analyzeEvals() {
+fun analyzeEvals(evalLoc: String) {
     val analyzer = EvalAnalyzer()
-    analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/eval_results")
+    analyzer.analyzeEvalResults(evalLoc)
+//    analyzer.analyzeEvalResults("/home/jsc57/projects/run_comparison/eval_results")
 }
 
 fun analyzeEntityEvals() {
@@ -285,6 +288,34 @@ fun quickDirtyConvert() {
 }
 
 
+
+fun newTest() {
+    val trec = "/home/jsc57/programs/trec_eval"
+    val runfiles = "/home/jsc57/fixed_psg_runs"
+    val qrels = listOf(
+            Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-automatic.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_auto.qrels",  "automatic"),
+                Triple("/home/jsc57/new_qrels/unfiltered/all-paragraph-manual.qrels", "/home/jsc57/new_qrels/unfiltered/rouge_manual.qrels",  "manual")
+    )
+
+    val sourceIndexLoc = "/home/jsc57/data/backup/extractions/paragraph2"
+    val targetIndexLoc = "/home/jsc57/data/backup/y2_benchmark/index"
+
+    qrels.forEach { (qrel, rougeQrel, name) ->
+        val newRunner = RougeentityF1(runfiles, rougeQrel, sourceIndexLoc, targetIndexLoc)
+        newRunner.runRetriever.computeAllF1(name)
+    }
+}
+
+fun mergeEvals(dir1: String, dir2: String, outDir: String) {
+    File(dir1).listFiles().zip(File(dir2).listFiles())
+        .forEach { (f1, f2) ->
+            File(outDir).run { if(!exists()) mkdir() }
+            val out = File(outDir + f1.nameWithoutExtension).bufferedWriter()
+            out.write(f1.readText() + "\n" + f2.readText())
+            out.close()
+        }
+}
+
 fun main(args: Array<String>) {
     System.setProperty("file.encoding", "UTF-8")
 
@@ -297,14 +328,25 @@ fun main(args: Array<String>) {
 //    evaluateManualRouge()
 //    evaluateSetQrels()
 //    evaluateTqaEnwikiQrels()
-    analyzeEvals()
+
+//    analyzeEvals()
 
 //    generateRougeQrels()
 //    generateEvals()
-//    generateEntityEvals()
 //    analyzeEvals()
+//    analyzeEvals("/home/jsc57/projects/run_comparison/eval_results")
+    analyzeEvals("/home/jsc57/projects/run_comparison/merged_evals")
+
+//    generateEntityEvals()
 //    analyzeEntityEvals()
+
 //    analyzeNewEvals()
+//    mergeEvals(
+//            dir1 = "/home/jsc57/projects/run_comparison/super_awesome_evals/manual",
+//            dir2 = "/home/jsc57/projects/run_comparison/eval_results/manual",
+//            outDir = "/home/jsc57/projects/run_comparison/merged_evals/manual/"
+//    )
+
 //    getIds()
 //    testSpec()
 //    doSearch()
@@ -313,6 +355,10 @@ fun main(args: Array<String>) {
 //        .run()
 
 //    quickDirtyConvert()
+//    newTest()
+//    analyzeEvals("/home/jsc57/projects/run_comparison/super_awesome_evals")
+    //.728
+    //0.759
     System.exit(0)
 
 }

@@ -73,7 +73,9 @@ class RougeEvaluator(sourceLoc: String, targetLoc: String, qrelDist: String) {
                 .parseRunfile(runfileLoc)
                 .mapValues { (query, pds) ->
                     val nRel = targetDist[query]?.size ?: 0
-                    pds.take(nRel)
+//                    pds.take(nRel) // Rouge@R
+                        pds.take(5) // ROUGE@5
+//                    pds.take(20) // ROUGE@20
                 }
                 .entries
                 .pmap { (query, pids) ->
@@ -92,12 +94,11 @@ class RougeEvaluator(sourceLoc: String, targetLoc: String, qrelDist: String) {
         return result?.doc?.let { id to searcher.doc(it).get("text") }
     }
 
+
+
+
     fun createRougeDocs(pList: Iterable<String>, searcher: IndexSearcher) =
             pList.map { id ->
-//                val result = searcher.search(TermQuery(Term("paragraphid", id)), 1)
-//                    .scoreDocs
-//                    .firstOrNull()
-//                val final = result?.doc?.let { id to searcher.doc(it).get("text") }
                 val final = getSearchResult(searcher, id) ?:
                     if (searcher == targetSearcher) getSearchResult(sourceSearcher, id)
                     else getSearchResult(targetSearcher, id)
@@ -109,8 +110,6 @@ class RougeEvaluator(sourceLoc: String, targetLoc: String, qrelDist: String) {
             }
                 .filterNotNull()
                 .map { (id, text) ->
-                    if (searcher == targetSearcher) {
-                    }
                     val tokens = AnalyzerFunctions.createTokenList(text, AnalyzerFunctions.AnalyzerType.ANALYZER_ENGLISH_STOPPED)
                     val unigrams = tokens.toSet()
                     val bigrams = tokens.windowed(2, 1, false)
@@ -293,7 +292,9 @@ class RougeEvaluator(sourceLoc: String, targetLoc: String, qrelDist: String) {
                 val nRel = stats.first().nRel
                 val averagePrecision = stats.map { it.precision.defaultWhenNotFinite(0.0) }.sum().div(nRel)
                 val averageRecall = stats.map { it.recall.defaultWhenNotFinite(0.0) }.sum().div(nRel)
-                val averageF1 = stats.map { it.f1.defaultWhenNotFinite(0.0) }.sum().div(nRel)
+//                val averageF1 = stats.map { it.f1.defaultWhenNotFinite(0.0) }.sum().div(nRel) // ROUGE@R
+                val averageF1 = stats.map { it.f1.defaultWhenNotFinite(0.0) }.sum().div(5) // ROUGE@5
+//                val averageF1 = stats.map { it.f1.defaultWhenNotFinite(0.0) }.sum().div(20) // ROUGE@20
 
                 if (name == "Bigrams")
                     return averageF1

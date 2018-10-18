@@ -34,7 +34,6 @@ class TagmeAnnotator(val cborLoc: String, entityMapLoc: String) {
                 val pid = p.paraId
                 val results =  doTagMeQuery(p.textOnly)
                     .distinctBy { it.first }
-//                val results = emptyList<Pair<String, Double>>()
 
                 results.forEach { (entity, _) ->
                     entitiesInSection.computeIfAbsent(entity) { ArrayList() }

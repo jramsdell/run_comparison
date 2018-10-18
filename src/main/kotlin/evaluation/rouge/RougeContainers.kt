@@ -1,16 +1,32 @@
 package evaluation.rouge
 
 import utils.defaultWhenNotFinite
+import kotlin.math.pow
 
 data class RougeDoc(
         val id: String,
-        val unigrams: Set<String>,
-        val bigrams: Set<String>) {
+        val unigrams: Set<String> = emptySet(),
+        val bigrams: Set<String> = emptySet(),
+        val entities: Map<String, Double> = emptyMap()) {
 
     fun quickF1(target: RougeDoc): Double {
         val precision = precisionFun(bigrams, target.bigrams)
         val recall = recallFun(bigrams, target.bigrams)
         val f1 = ((2 * precision * recall) / (precision + recall)).defaultWhenNotFinite(0.0)
+        return f1
+    }
+
+
+    fun entityQuickF1(target: RougeDoc): Double {
+        val precision = precisionFun(entities.keys, target.entities.keys)
+        val recall = recallFun(entities.keys, target.entities.keys)
+        val f1 = ((2 * precision * recall) / (precision + recall)).defaultWhenNotFinite(0.0)
+//
+//        val selfNorm = entities.values.map { it.pow(2.0) }.sum().pow(0.5)
+//        val targetNorm = target.entities.values.map { it.pow(2.0) }.sum().pow(0.5)
+//
+//        val f1 = target.entities.entries.sumByDouble { (entity, rho) ->
+//            rho * (entities[entity] ?: 0.0) } / (selfNorm * targetNorm)
         return f1
     }
 }
@@ -57,3 +73,16 @@ private fun recallFun(source: Set<String>, target: Set<String>): Double {
     val intersection = (target.intersect(source)).size
     return intersection / totalTarget
 }
+
+//private fun precisionRhoFun(source: Map<String, Double>, target: Map<String, Double>): Double {
+//    val totalSource = source.values.map { it.pow(2.0) }.sum()
+//
+//    val intersection = (target.intersect(source)).size
+//    return intersection / totalSource
+//}
+//
+//private fun recallRhoFun(source: Set<String>, target: Set<String>): Double {
+//    val totalTarget = target.size.toDouble()
+//    val intersection = (target.intersect(source)).size
+//    return intersection / totalTarget
+//}

@@ -58,9 +58,12 @@ class EvalAnalyzer() {
     fun analyzeEvalResults(evalFolderLoc: String) {
         val rankings = retrieveRankings(evalFolderLoc)
         val allowed = setOf(
-                "map",
-                "RougeF1"
-//                "ndcg",
+                "RougeF1",
+                "RougeF1Entity",
+//                "map"
+                "ndcg",
+//                "P_5",
+                "Rprec"
 //                "Rndcg",
 //                "ndcg_rel",
 //                "ndcg_cut_5"
@@ -69,6 +72,11 @@ class EvalAnalyzer() {
         val filteredRankings =
 //                rankings.filter { it.methodName == "RougeF1" || it.methodName == "map" || it.methodName == "ndcg"}
         rankings.filter { it.methodName in allowed }
+//            .filter { ("manual" in it.qrelName) }
+//            .filter { !("auto" in it.qrelName && "tqa" in it.qrelName) }
+//            .filter { "tqa" !in it.qrelName && "enwiki" !in it.qrelName }
+//            .filter { "tqa" in it.qrelName || "enwiki" in it.qrelName }
+//            .filter { "man" in it.qrelName }
                     .sortedByDescending { it.qrelName  }
         generateMatrixFromRankings(filteredRankings)
 
@@ -80,26 +88,27 @@ class EvalAnalyzer() {
                 .replace("manual", "man")
                 .replace("automatic", "auto")
                 .replace("RougeF1", "rf1")
-                .replace("_", "\\_")
+                .replace("_", "-")
             name to rankings.map { r2 ->
                 val spearman = getSpearmanFromMap(r1.runRankings, r2.runRankings)
                 spearman.toString().take(5) }
                 .joinToString(" & ")
         }
 
-        val columns = rankings.map {
+        val columns = rankings
+            .map {
             val name = (it.qrelName + "_" + it.methodName)
                 .replace("manual", "man")
                 .replace("automatic", "auto")
                 .replace("RougeF1", "rf1")
-                .replace("_", "\\_")
-            "\\textbf{$name}" }
+                .replace("_", "-")
+            "\\textbf{\\tiny $name}" }
             .joinToString(" & ")
 
         println(" \\textbf{Name} & $columns \\\\\\hline")
 
         matrix.forEach { (methodName, row) ->
-            println("$methodName & $row\\\\\\hline")
+            println("\\textbf{\\tiny $methodName} & $row\\\\\\hline")
         }
 
     }
@@ -166,6 +175,7 @@ class EvalAnalyzer() {
             file
                 .bufferedReader()
                 .lines()
+                .filter { it.isNotEmpty() }
                 .map(EvalRunResult.Companion::createEvalRunResultFromLine)
                 .toList()
 
